@@ -244,14 +244,17 @@ def main():
     reviewers = [collaborator ["login"] for collaborator in get_collaborators (gh, cfg["owner"], cfg["repo"])]
     logging.info("found %d collaborators: %s" % (len (reviewers), ", ".join (reviewers)))
 
-    pulls = gh.repos (cfg["owner"]) (cfg["repo"]).pulls ().get (state="open", sort="updated", direction="desc", per_page = 100)
+    pulls =  []
+    for searchterm in ['monojenkins', 'automerge']:
+        for e in gh.search ().issues ().get (q = 'is:open+repo:' + cfg["owner"] + '/' + cfg["repo"] + '+' + searchterm, type='pr')["items"]:
+            pulls.append (e['pull_request']['url'].split ('/')[-1])
     logging.info("found %d pull requests", len (pulls))
 
     pulls = pulls [0:50]
     logging.info("considering %d pull requests", len (pulls))
 
     for pull in pulls:
-        PullReq (cfg, gh, gh.repos (cfg ["owner"]) (cfg ["repo"]).pulls (pull ["number"]).get (), reviewers).try_merge ()
+        PullReq (cfg, gh, gh.repos (cfg ["owner"]) (cfg ["repo"]).pulls (pull).get (), reviewers).try_merge ()
 
 if __name__ == "__main__":
     try:

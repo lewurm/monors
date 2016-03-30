@@ -144,6 +144,7 @@ class GitHub(object):
         url = '%s%s' % (self._URL, path)
         opener = urllib2.build_opener(urllib2.HTTPSHandler)
         request = urllib2.Request(url, data=data)
+        # print "request: " + str(url)
         request.get_method = _METHOD_MAP[method]
         if self._authorization:
             request.add_header('Authorization', self._authorization)
@@ -241,7 +242,10 @@ def _encode_params(kw):
     args = []
     for k, v in kw.iteritems():
         qv = v.encode('utf-8') if isinstance(v, unicode) else str(v)
-        args.append('%s=%s' % (k, urllib.quote(qv)))
+        if k == 'q':
+            args.append('%s=%s' % (k, qv))
+        else:
+            args.append('%s=%s' % (k, urllib.quote(qv)))
     return '&'.join(args)
 
 def _encode_json(obj):
